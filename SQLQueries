@@ -1,0 +1,72 @@
+Select*
+From NashVilleHousing.dbo.Nash
+
+-- Standardize Date Format
+Select SaleDate, CONVERT(Date,SaleDate)
+From Nash
+
+Update Nash
+Set SaleDate = CONVERT(Date,SaleDate)
+
+Select SaleDate
+From Nash
+
+ALTER TABLE Nash
+Add SaleDateConverted Date
+
+Update Nash
+SET SaleDateConverted = CONVERT(Date,SaleDate)
+
+Select SaleDateConverted
+From Nash
+
+-- Property Address Data
+Select *
+From Nash
+Where PropertyAddress is null
+
+Select *
+From Nash
+Order by ParcelID
+
+Select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress
+From Nash a
+Join Nash b
+on a.ParcelID = b.ParcelID
+and a.UniqueID <> b.UniqueID
+Where a.PropertyAddress is null
+
+Select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.PropertyAddress, b.PropertyAddress)
+From Nash a
+Join Nash b
+on a.ParcelID = b.ParcelID
+and a.UniqueID <> b.UniqueID
+Where a.PropertyAddress is null
+
+-- Update
+Update a
+Set PropertyAddress = ISNULL(a.PropertyAddress, b.PropertyAddress)
+From Nash a
+Join Nash b
+on a.ParcelID = b.ParcelID
+
+-- Breaking out address into individual columns (Address, City, State)
+Select PropertyAddress
+From Nash
+
+-- Separate Street Address part from the rest of the address like city, state, zip
+SELECT
+SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress)) AS Address
+FROM Nash
+
+SELECT
+SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress)) AS Address, CHARINDEX(',', PropertyAddress)
+FROM Nash
+
+SELECT
+SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) -1) AS Address
+FROM Nash
+
+SELECT
+SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) -1) AS Address, SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) +1, LEN(PropertyAddress)) AS Address
+FROM Nash
