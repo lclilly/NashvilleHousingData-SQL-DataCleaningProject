@@ -70,3 +70,64 @@ FROM Nash
 SELECT
 SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) -1) AS Address, SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) +1, LEN(PropertyAddress)) AS Address
 FROM Nash
+
+ALTER TABLE Nash
+ADD PropertySplitAddress NVARCHAR(255)
+
+UPDATE Nash
+SET PropertySplitAddress = SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress)-1)
+
+ALTER TABLE Nash
+ADD PropertySplitCity nvarchar(255)
+
+UPDATE Nash
+SET PropertySplitCity = SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress)+1, LEN(PropertyAddress))
+
+SELECT*
+FROM Nash
+
+-- Owner Address
+-- Parse name
+
+SELECT OwnerAddress
+FROM Nash
+
+SELECT
+PARSENAME(REPLACE(OwnerAddress, ',', '.'), 3)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.'), 2)
+,PARSENAME(REPLACE(OwnerAddress, ',', '.'), 1)
+FROM Nash
+
+ALTER TABLE Nash
+ADD OwnerSplitAddress NVARCHAR(255)
+
+UPDATE Nash
+SET OwnerSplitAddress = PARSENAME(REPLACE(OwnerAddress, ',', '.'), 3)
+
+ALTER TABLE Nash
+ADD OwnerSplitCity nvarchar(255)
+
+UPDATE Nash
+SET OwnerSplitCity = PARSENAME(REPLACE(OwnerAddress, ',', '.'), 2)
+
+ALTER TABLE Nash
+ADD OwnerSplitState nvarchar(255)
+
+UPDATE Nash
+SET OwnerSplitState = PARSENAME(REPLACE(OwnerAddress, ',', '.'), 1)
+
+SELECT *
+FROM Nash
+
+-- Change Y and N to Yes and No in Sold as vacant
+SELECT DISTINCT (SoldAsVacant), COUNT(SoldAsVacant)
+FROM Nash
+GROUP BY SoldAsVacant
+ORDER BY 2
+
+SELECT SoldAsVacant
+, CASE WHEN SoldAsVacant = 'Y' THEN 'Yes'
+WHEN SoldAsVacant = 'N' THEN 'No'
+ELSE SoldAsVacant
+END
+FROM Nash
