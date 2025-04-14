@@ -131,3 +131,41 @@ WHEN SoldAsVacant = 'N' THEN 'No'
 ELSE SoldAsVacant
 END
 FROM Nash
+
+-- Removing Duplicates
+-- Finding and filtering duplicates
+SELECT*,
+ROW_NUMBER() OVER (PARTITION BY ParcelID, PropertyAddress, SalePrice, SaleDate, LegalReference ORDER BY UniqueID) row_num
+FROM Nash
+-- Using a CTE because we can't use WHERE row_num>1 statement on the previous query
+WITH RowNumCTE AS
+(
+SELECT*,
+ROW_NUMBER() OVER (PARTITION BY ParcelID, PropertyAddress, SalePrice, LegalReference ORDER BY UniqueID) row_num
+FROM Nash
+)
+SELECT*
+FROM ROWNumCTE
+WHERE row_num > 1
+ORDER BY PropertyAddress
+
+-- Deleting duplicate rows
+WITH RowNumCTE AS
+(
+SELECT*,
+ROW_NUMBER() OVER (PARTITION BY ParcelID, PropertyAddress, SalePrice, LegalReference ORDER BY UniqueID) row_num
+FROM Nash
+)
+DELETE
+FROM RowNumCTE
+WHERE row_num > 1
+
+-- Deleting unused columns
+ALTER TABLE Nash
+DROP COLUMN OwnerAddress, TaxDistrict, PropertyAddress
+
+SELECT*
+FROM Nash
+
+ALTER TABLE Nash
+DROP COLUMN SaleDate
